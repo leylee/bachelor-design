@@ -1,10 +1,12 @@
-# 20230301 D1 开发板虚拟内存映射错误
+# 过程记录
 
-## 现象
+## 20230301 D1 开发板虚拟内存映射错误
+
+### 现象
 
 在 D1 上启动时执行到映射虚拟内存的函数 `activateMapping()` 中的 `csrw satp` 指令后, 会在执行后续指令时异常卡死. 在 qemu 中执行却没有这个问题.
 
-## 原因
+### 原因
 
 根据 *The RISC-V Instruction Set Manual
 Volume II: Privileged Architecture* 4.3.1 节, 叶子页表项的 accessed 和 dirty bit 有两种管理方式:
@@ -21,9 +23,8 @@ program order by the local hart. Furthermore, the PTE update must appear in the 
 memory order no later than the explicit memory access, or any subsequent explicit memory
 access to that virtual page by the local hart. The ordering on loads and stores provided by
 FENCE instructions and the acquire/release bits on atomic instructions also orders the PTE
-updates associated with those loads and stores as observed by remote harts.
-
-    The PTE update is not required to be atomic with respect to the explicit memory access that
+updates associated with those loads and stores as observed by remote harts.  
+The PTE update is not required to be atomic with respect to the explicit memory access that
 caused the update, and the sequence is interruptible. However, the hart must not perform
 the explicit memory access before the PTE update is globally visible.
 
@@ -50,10 +51,32 @@ Fault (store) 异常，通过在异常服务程序中配置 D 位来维护该页
 
 猜测 QEMU 能够正常执行是使用了 risc-v 规范中的第二种管理方式.
 
-## 解决方法
+### 解决方法
 
 将 `mapLinearSegment()` 函数中, 设置页表项的语句改为
 
 ```c
 *entry = ((vpn - KERNEL_PAGE_OFFSET) << 10) | segment.flags | VALID | ACCESSED | DIRTY;
+```
+
+修复后, QEMU 和 D1 均能正常执行.
+
+## 20230302 allocTid() 失败
+
+### 现象
+
+第一次执行到 `allocTid()` 函数时, 无法找到未使用的 tid, kernel panic 输出 `"Alloc tid failed!"`
+
+### 原因
+
+CPU 线程池 `CPU.pool` 未初始化.
+
+### 解决方法
+
+在 `newThreadPool()` 函数中添加初始化代码:
+
+```c
+for (usize i = 0; i < MAX_THREAD; ++i) {
+    pool.threads[i].occupied = 0;
+}
 ```
