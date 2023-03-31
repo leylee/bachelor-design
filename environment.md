@@ -45,6 +45,10 @@ Press CTRL-A Z for help on special keys
 
 成功打开串口终端.
 
+安装后默认开启了硬件流控, 需要关闭: 进入 minicom 后, 按下 `Ctrl+A Z` 查看帮助菜单, 按下 `O` 进入 `cOnfigure Minicom`, 选择 `Serial port setup`, 按下 `F` 关闭 `Hard Flow Control`, 回车应用设置, 自动返回上一级菜单; 选择 `Save setup as dfl` 将当前设置保存为默认配置. 按 `Esc` 退出设置菜单, 将 USB to TTL 模块的 Tx 和 Rx 短接, 在 minicom 中输入字符可以看到回显, 说明配置正确.
+
+![回显输入](img/loopback_echo.png)
+
 ## 安装 xfel
 
 ```bash
