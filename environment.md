@@ -257,3 +257,97 @@ PMP2    : 0x0000000080000000-0x00000000bfffffff (A,R,W,X)
 PMP3    : 0x0000000000020000-0x0000000000027fff (A,R,W,X)
 PMP4    : 0x0000000000000000-0x000000003fffffff (A,R,W)
 ```
+
+## 编译并运行 Moonix
+
+```bash
+$ git clone git@github.com:leylee/moonix.git -b d1
+Cloning into 'moonix'...
+remote: Enumerating objects: 724, done.
+remote: Counting objects: 100% (379/379), done.
+remote: Compressing objects: 100% (209/209), done.
+remote: Total 724 (delta 238), reused 277 (delta 165), pack-reused 345
+Receiving objects: 100% (724/724), 949.50 KiB | 654.00 KiB/s, done.
+Resolving deltas: 100% (426/426), done.
+$ cd moonix
+$ git submodule update --init
+Cloning into '/home/leylee/moonix/OpenSBI-C906'...
+Submodule path 'OpenSBI-C906': checked out 'f45d5b8b9c06281a64a1d0dc86cdb0d3b286e9da'
+$ make PLATFORM=NEZHA_D1 OPENSBI_CROSS_COMPILE=/path/to/xuantie-gcc/bin/riscv64-unknown-elf- xfel-run
+...
+xfel version
+AWUSBFEX ID=0x00185900(D1/F133) dflag=0x44 dlength=0x08 scratchpad=0x00045000
+xfel ddr d1
+Initial ddr controller succeeded
+xfel write 0x80000000 fw_jump.bin
+100% [================================================] 60.555 KB, 404.318 KB/s        
+xfel write 0x80200000 Image
+100% [================================================] 1.024 MB, 401.330 KB/s         
+xfel exec 0x80000000
+```
+
+minicom 输出
+
+```
+DRAM only have internal ZQ!!
+get_pmu_exist() = 4294967295
+ddr_efuse_type: 0x0
+[AUTO DEBUG] two rank and full DQ!
+ddr_efuse_type: 0x0
+[AUTO DEBUG] rank 0 row = 16 
+[AUTO DEBUG] rank 0 bank = 8 
+[AUTO DEBUG] rank 0 page size = 2 KB 
+[AUTO DEBUG] rank 1 row = 16 
+[AUTO DEBUG] rank 1 bank = 8 
+[AUTO DEBUG] rank 1 page size = 2 KB 
+rank1 config same as rank0
+DRAM BOOT DRIVE INFO: %s
+DRAM CLK = 792 MHz
+DRAM Type = 3 (2:DDR2,3:DDR3)
+DRAMC ZQ value: 0x7b7bfb
+DRAM ODT value: 0x42.
+ddr_efuse_type: 0x0
+DRAM SIZE =2048 M
+DRAM simple test OK.
+
+OpenSBI v0.6
+   ____                    _____ ____ _____
+  / __ \                  / ____|  _ \_   _|
+ | |  | |_ __   ___ _ __ | (___ | |_) || |
+ | |  | | '_ \ / _ \ '_ \ \___ \|  _ < | |
+ | |__| | |_) |  __/ | | |____) | |_) || |_
+  \____/| .__/ \___|_| |_|_____/|____/_____|
+        | |
+        |_|
+
+Platform Name          : Allwinner SUN20i - T-HEAD Xuantie Platform
+Platform HART Features : RV64ACDFIMSUVX
+Platform Max HARTs     : 1
+Current Hart           : 0
+Firmware Base          : 0x80000400
+Firmware Size          : 75 KB
+Runtime SBI Version    : 0.2
+
+MIDELEG : 0x0000000000000222
+MEDELEG : 0x000000000000b1ff
+PMP0    : 0x0000000080000000-0x000000008001ffff (A)
+PMP1    : 0x0000000040000000-0x000000007fffffff (A,R,W,X)
+PMP2    : 0x0000000080000000-0x00000000bfffffff (A,R,W,X)
+PMP3    : 0x0000000000020000-0x0000000000027fff (A,R,W,X)
+PMP4    : 0x0000000000000000-0x000000003fffffff (A,R,W)
+Initializing Moonix...
+***** Init Memory *****
+***** Map Kernel *****
+***** Map Ext Interrupt Area *****
+***** Activate Mapping *****
+will set to 0x8000000000080C60
+***** Map Kernel Finish *****
+***** Init Memory Finish *****
+***** Init Interrupt *****
+***** init thread *****
+***** Init Timer Finished *****
+Welcome to Moonix!
+$ 
+```
+
+成功启动系统.
